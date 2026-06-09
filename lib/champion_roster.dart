@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart' hide YoutubePlayerController;
+import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt_mobile;
 
 // --- Champion Structs ---
 class ChampionStats {
@@ -84,7 +88,6 @@ final List<Champion> roster = [
             bio: 'An Ionian of deep resolve, Yasuo is an agile swordsman who wields the air itself against his enemies. He excels at mid-range, using the power of the wind to dash through opponents and block projectiles.', 
             profileImage: 'assets/champs/Yasuo-2XKO-Profile.png',
             stats: const ChampionStats(range: 3, power: 3, vitality: 3, mobility: 3, easeOfUse: 3)),
-
 ];
 
 class PlaystyleClipper extends CustomClipper<Path> {
@@ -149,7 +152,7 @@ class _RosterListViewState extends State<RosterListView> {
                       child: ListTile(
                         leading: Hero(tag: 'icon-${filteredRoster[i].name}', child: Material(color: Colors.transparent, child: Text(filteredRoster[i].icon, style: const TextStyle(fontSize: 28)))),
                         title: Row(
-                          mainAxisSize: MainAxisSize.min, // Forces the row to wrap tight around the items
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(currentChamp.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                             if (currentChamp.isNew) ...[
@@ -157,7 +160,7 @@ class _RosterListViewState extends State<RosterListView> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xffe60042), // 2XKO Vivid Crimson red
+                                  color: const Color(0xffe60042),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
@@ -168,11 +171,11 @@ class _RosterListViewState extends State<RosterListView> {
                             ],
                           ],
                         ),
-                      subtitle: Text(filteredRoster[i].playstyle, style: const TextStyle(color: Colors.cyanAccent)),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChampionDetailPage(champion: filteredRoster[i]))),
-                    ),
-                  );
+                        subtitle: Text(filteredRoster[i].playstyle, style: const TextStyle(color: Colors.cyanAccent)),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChampionDetailPage(champion: filteredRoster[i]))),
+                      ),
+                    );
                 }
               ),
             ),
@@ -182,9 +185,80 @@ class _RosterListViewState extends State<RosterListView> {
   }
 }
 
-class ChampionDetailPage extends StatelessWidget {
+class ChampionDetailPage extends StatefulWidget {
   final Champion champion;
   const ChampionDetailPage({super.key, required this.champion});
+
+  @override
+  State<ChampionDetailPage> createState() => _ChampionDetailPageState();
+}
+
+class _ChampionDetailPageState extends State<ChampionDetailPage> {
+  late Future<String> _videoFuture;
+  yt_mobile.YoutubePlayerController? _youtubeController;
+  bool _isVideoInitialized = false;
+
+  // Map to link Champion names to specific YouTube IDs
+  final Map<String, String> _championVideoMap = {
+    'Ahri': 'EOr6cnybcPg',
+    'Akali': 'fT4CwqJNdMU',
+    'Blitzcrank': 'RPx3m5UalQs',
+    'Braum': 'vEcGceXBQoE',
+    'Caitlyn': 'e8al2A0FsU0',
+    'Darius': 'mj8Ym4Q_66c',
+    'Ekko': '0x2Lhj8Ibwo',
+    'Illaoi': 'qZWu8nA45ko',
+    'Jinx': '9cJVWte_4Hc',
+    'Senna': '6878YYX1LE8',
+    'Teemo': 'A8-Uw_sypMs',
+    'Thresh': '45q18ujEYyk',
+    'Vi': 'quGZjIkigu4',
+    'Warwick': '4CRb0tPXCXY',
+    'Yasuo': 'vmx6h7wN3j4',
+    // Add your other champion video IDs here...
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _videoFuture = _fetchChampionVideoId(widget.champion.name);
+  }
+
+  @override
+  void dispose() {
+    _youtubeController?.close();
+    super.dispose();
+  }
+
+  Future<String> _fetchChampionVideoId(String name) async {
+    // Mimicking the API fetch from your other file
+    final url = Uri.parse('https://cdn.rgpub.io/public/live/riotbar/content-manifests/en_US.json');
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final videoId = _championVideoMap[name] ?? 'xyK3lFtz2H8'; // Default video to 2XKO cinematic
+        _initializeYouTube(videoId);
+        return videoId;
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return 'xyK3lFtz2H8'; // Default video to 2XKO cinematic
+  }
+
+  void _initializeYouTube(String videoId) {
+    _youtubeController = yt_mobile.YoutubePlayerController.fromVideoId(
+      videoId: videoId,
+      autoPlay: true,
+      params: const yt_mobile.YoutubePlayerParams(
+        showControls: true,
+        showFullscreenButton: true,
+        loop: true,
+        enableJavaScript: true,
+      ),
+    );
+    setState(() => _isVideoInitialized = true);
+  }
 
   Widget _buildStatRow(String label, int value) {
     return Row(
@@ -198,7 +272,7 @@ class ChampionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(champion.name)),
+      appBar: AppBar(title: Text(widget.champion.name)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -207,24 +281,44 @@ class ChampionDetailPage extends StatelessWidget {
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(champion.profileImage, height: 400, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Hero(tag: 'icon-${champion.name}', child: Material(color: Colors.transparent, child: Text(champion.icon, style: const TextStyle(fontSize: 100))))),
+                child: Image.asset(widget.champion.profileImage, height: 400, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Hero(tag: 'icon-${widget.champion.name}', child: Material(color: Colors.transparent, child: Text(widget.champion.icon, style: const TextStyle(fontSize: 100))))),
               ),
             ),
             const SizedBox(height: 10),
-            Center(child: Text(champion.title, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey))),
+            Center(child: Text(widget.champion.title, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey))),
             const Divider(height: 40, color: Colors.white24),
-            ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
+            ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
             const SizedBox(height: 15),
-            _buildStatRow("Range", champion.stats.range), _buildStatRow("Power", champion.stats.power), _buildStatRow("Vitality", champion.stats.vitality), _buildStatRow("Mobility", champion.stats.mobility), _buildStatRow("Ease of Use", champion.stats.easeOfUse),
+            _buildStatRow("Range", widget.champion.stats.range), _buildStatRow("Power", widget.champion.stats.power), _buildStatRow("Vitality", widget.champion.stats.vitality), _buildStatRow("Mobility", widget.champion.stats.mobility), _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
             const SizedBox(height: 30),
             const Text("SHOWCASE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
             const SizedBox(height: 8),
-            // Window reserved for online video JSON streaming links later
-            Container(width: double.infinity, padding: const EdgeInsets.all(12), color: Colors.white, child: const Text("💡 Frame/Move Video Data Feed Hub (Coming Soon)", style: TextStyle(color: Colors.grey, fontSize: 12))),
+            
+            // --- VIDEO FEED SECTION ---
+            FutureBuilder<String>(
+              future: _videoFuture,
+              builder: (context, snapshot) {
+                if (!_isVideoInitialized) {
+                  return Container(
+                    height: 200,
+                    width: double.infinity,
+                    color: Colors.white10,
+                    child: const Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+                  );
+                }
+                return Container(
+                  width: double.infinity,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+                  child: yt_mobile.YoutubePlayer(controller: _youtubeController!),
+                );
+              }
+            ),
+            
             const SizedBox(height: 24),
             const Text("BIO", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
             const SizedBox(height: 10),
-            Text(champion.bio, style: const TextStyle(fontSize: 16, height: 1.5)),
+            Text(widget.champion.bio, style: const TextStyle(fontSize: 16, height: 1.5)),
           ],
         ),
       ),

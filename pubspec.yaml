@@ -1,5 +1,5 @@
-name: e_book
-description: "A new Flutter project."
+name: e_book_2xko
+description: "A Flutter eBook app showcasing the champion roster and fuse mechanics of the 2XKO game."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  http: ^1.2.0
+  video_player: ^2.11.1
+  youtube_player_flutter: ^10.0.1
 
 dev_dependencies:
   flutter_test:
