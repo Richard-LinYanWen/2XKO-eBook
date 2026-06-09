@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt_mobile;
 import 'background_pattern.dart';
+import 'reveal_animation.dart';
+import 'status_bar.dart';
 
 // --- Champion Structs ---
 class ChampionStats {
@@ -262,8 +264,22 @@ class _ChampionDetailPageState extends State<ChampionDetailPage> {
   Widget _buildStatRow(String label, int value) {
     return Row(
       children: [
-        Expanded(flex: 3, child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey))),
-        Expanded(flex: 5, child: Row(children: List.generate(5, (index) => Expanded(child: Container(height: 8, margin: const EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: index < value ? Colors.greenAccent : Colors.white10, borderRadius: BorderRadius.circular(2))))))),
+        Expanded(
+          flex: 3, 
+          child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey))
+        ),
+        Expanded(
+          flex: 5, 
+          child: Row(
+            children: List.generate(5, (index) {
+              // Pass the index to StatBar to determine the delay
+              return StatBar(
+                columnIndex: index, 
+                isFilled: index < value,
+              );
+            }),
+          ),
+        ),
       ],
     );
   }
@@ -288,9 +304,28 @@ class _ChampionDetailPageState extends State<ChampionDetailPage> {
               const SizedBox(height: 10),
               Center(child: Text(widget.champion.title, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey))),
               const Divider(height: 40, color: Colors.white24),
-              ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
+              //ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
+              LeftToRightReveal(
+                child: ClipPath(
+                  clipper: PlaystyleClipper(), 
+                  child: Container(
+                    decoration: const BoxDecoration(color: Colors.greenAccent), 
+                    padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), 
+                    child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black))
+                  )
+                ),
+              ),
               const SizedBox(height: 15),
-              _buildStatRow("Range", widget.champion.stats.range), _buildStatRow("Power", widget.champion.stats.power), _buildStatRow("Vitality", widget.champion.stats.vitality), _buildStatRow("Mobility", widget.champion.stats.mobility), _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
+              //_buildStatRow("Range", widget.champion.stats.range), _buildStatRow("Power", widget.champion.stats.power), _buildStatRow("Vitality", widget.champion.stats.vitality), _buildStatRow("Mobility", widget.champion.stats.mobility), _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
+              Column(
+                children: [
+                  _buildStatRow("Range", widget.champion.stats.range), 
+                  _buildStatRow("Power", widget.champion.stats.power), 
+                  _buildStatRow("Vitality", widget.champion.stats.vitality), 
+                  _buildStatRow("Mobility", widget.champion.stats.mobility), 
+                  _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
+                ],
+              ),
               const SizedBox(height: 30),
               const Text("SHOWCASE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
               const SizedBox(height: 8),
