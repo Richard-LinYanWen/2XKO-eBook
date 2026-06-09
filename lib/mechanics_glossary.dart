@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'favorites_page.dart';
+import 'background_pattern.dart';
 
 class GlossaryTerm {
   final String term;
@@ -85,63 +85,65 @@ class _MechanicsGlossaryState extends State<MechanicsGlossary> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: SearchBar(
-            hintText: 'Search terms (e.g., "Hitstun")...',
-            onChanged: _filterSearch,
-            leading: const Icon(Icons.search, color: Colors.cyanAccent),
-          ),
-        ),
-        if (_isLoading) const LinearProgressIndicator(color: Colors.cyanAccent),
-        if (_hasError) 
-          Expanded(child: Center(child: TextButton(onPressed: _loadData, child: const Text('Sync Failed. Retry?')))),
-        if (!_isLoading && !_hasError)
-          Expanded(
-            child: RefreshIndicator(
-              color: Colors.cyanAccent,
-              onRefresh: _loadData,
-              child: ListView.builder(
-                itemCount: filteredTerms.length,
-                itemBuilder: (context, index) {
-                  final item = filteredTerms[index];
-                  return Card(
-                    child: ListTile(
-                      // We use a Row to put the text and the icon side-by-side inside the title area
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.term, 
-                              style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              FavoritesManager.isFavorite(item.term) ? Icons.star : Icons.star_border,
-                              color: Colors.amber, // Yellow color for the star
-                            ),
-                            // This keeps the icon close to the text
-                            padding: EdgeInsets.zero, 
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              setState(() {
-                                FavoritesManager.toggle(item.term);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: Text(item.definition),
-                    )
-                  );
-                },
-              ),
+    return BackgroundPattern(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SearchBar(
+              hintText: 'Search terms (e.g., "Hitstun")...',
+              onChanged: _filterSearch,
+              leading: const Icon(Icons.search, color: Colors.cyanAccent),
             ),
           ),
-      ],
+          if (_isLoading) const LinearProgressIndicator(color: Colors.cyanAccent),
+          if (_hasError) 
+            Expanded(child: Center(child: TextButton(onPressed: _loadData, child: const Text('Sync Failed. Retry?')))),
+          if (!_isLoading && !_hasError)
+            Expanded(
+              child: RefreshIndicator(
+                color: Colors.cyanAccent,
+                onRefresh: _loadData,
+                child: ListView.builder(
+                  itemCount: filteredTerms.length,
+                  itemBuilder: (context, index) {
+                    final item = filteredTerms[index];
+                    return Card(
+                      child: ListTile(
+                        // We use a Row to put the text and the icon side-by-side inside the title area
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.term, 
+                                style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                FavoritesManager.isFavorite(item.term) ? Icons.star : Icons.star_border,
+                                color: Colors.amber, // Yellow color for the star
+                              ),
+                              // This keeps the icon close to the text
+                              padding: EdgeInsets.zero, 
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                setState(() {
+                                  FavoritesManager.toggle(item.term);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: Text(item.definition),
+                      )
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

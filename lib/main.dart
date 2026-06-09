@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
 import 'favorites_page.dart';
+import 'splash_screen.dart';
 
 Set<String> globalFavorites = {};
 
@@ -21,14 +21,14 @@ class TwoXKOWikiApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '2XKO Terminal Portal',
+      title: '2XKO Wiki & Glossary',
       theme: ThemeData.dark().copyWith(
         primaryColor: Colors.cyanAccent,
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF1A1A1A)),
       ),
-      // The Entry Point is now the Login Page
-      home: LoginPage(), 
+      // Entry with Splash screen
+      home: const SplashScreen(), 
     );
   }
 }

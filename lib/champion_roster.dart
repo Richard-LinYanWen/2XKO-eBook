@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart' hide YoutubePlayerController;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt_mobile;
+import 'background_pattern.dart';
 
 // --- Champion Structs ---
 class ChampionStats {
@@ -271,55 +270,58 @@ class _ChampionDetailPageState extends State<ChampionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.champion.name)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(widget.champion.profileImage, height: 400, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Hero(tag: 'icon-${widget.champion.name}', child: Material(color: Colors.transparent, child: Text(widget.champion.icon, style: const TextStyle(fontSize: 100))))),
+    return BackgroundPattern(
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Let the pattern show through
+        appBar: AppBar(title: Text(widget.champion.name)),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(widget.champion.profileImage, height: 400, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Hero(tag: 'icon-${widget.champion.name}', child: Material(color: Colors.transparent, child: Text(widget.champion.icon, style: const TextStyle(fontSize: 100))))),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Center(child: Text(widget.champion.title, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey))),
-            const Divider(height: 40, color: Colors.white24),
-            ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
-            const SizedBox(height: 15),
-            _buildStatRow("Range", widget.champion.stats.range), _buildStatRow("Power", widget.champion.stats.power), _buildStatRow("Vitality", widget.champion.stats.vitality), _buildStatRow("Mobility", widget.champion.stats.mobility), _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
-            const SizedBox(height: 30),
-            const Text("SHOWCASE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
-            const SizedBox(height: 8),
-            
-            // --- VIDEO FEED SECTION ---
-            FutureBuilder<String>(
-              future: _videoFuture,
-              builder: (context, snapshot) {
-                if (!_isVideoInitialized) {
+              const SizedBox(height: 10),
+              Center(child: Text(widget.champion.title, style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey))),
+              const Divider(height: 40, color: Colors.white24),
+              ClipPath(clipper: PlaystyleClipper(), child: Container(padding: const EdgeInsets.fromLTRB(45, 5, 30, 5), decoration: const BoxDecoration(color: Colors.greenAccent), child: Text(widget.champion.playstyle.toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)))),
+              const SizedBox(height: 15),
+              _buildStatRow("Range", widget.champion.stats.range), _buildStatRow("Power", widget.champion.stats.power), _buildStatRow("Vitality", widget.champion.stats.vitality), _buildStatRow("Mobility", widget.champion.stats.mobility), _buildStatRow("Ease of Use", widget.champion.stats.easeOfUse),
+              const SizedBox(height: 30),
+              const Text("SHOWCASE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
+              const SizedBox(height: 8),
+              
+              // --- VIDEO FEED SECTION ---
+              FutureBuilder<String>(
+                future: _videoFuture,
+                builder: (context, snapshot) {
+                  if (!_isVideoInitialized) {
+                    return Container(
+                      height: 200,
+                      width: double.infinity,
+                      color: Colors.white10,
+                      child: const Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+                    );
+                  }
                   return Container(
-                    height: 200,
                     width: double.infinity,
-                    color: Colors.white10,
-                    child: const Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+                    child: yt_mobile.YoutubePlayer(controller: _youtubeController!),
                   );
                 }
-                return Container(
-                  width: double.infinity,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-                  child: yt_mobile.YoutubePlayer(controller: _youtubeController!),
-                );
-              }
-            ),
-            
-            const SizedBox(height: 24),
-            const Text("BIO", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
-            const SizedBox(height: 10),
-            Text(widget.champion.bio, style: const TextStyle(fontSize: 16, height: 1.5)),
-          ],
+              ),
+              
+              const SizedBox(height: 24),
+              const Text("BIO", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
+              const SizedBox(height: 10),
+              Text(widget.champion.bio, style: const TextStyle(fontSize: 16, height: 1.5)),
+            ],
+          ),
         ),
       ),
     );

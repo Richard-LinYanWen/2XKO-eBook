@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'background_pattern.dart';
 
 class FavoritesManager {
   static Set<String> _favorites = {};
@@ -52,20 +53,23 @@ class FavoritesPage extends StatelessWidget {
     // Get the latest list every time the page builds
     final savedTerms = FavoritesManager.allFavorites;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("SAVED TERMS")),
-      body: savedTerms.isEmpty
-          ? const Center(child: Text("No favorites saved yet!"))
-          : ListView.builder(
-              itemCount: savedTerms.length,
-              itemBuilder: (context, index) {
-                final term = savedTerms[index];
-                return ListTile(
-                  title: Text(term, style: const TextStyle(color: Colors.amber)),
-                  leading: const Icon(Icons.star, color: Colors.amber),
-                );
-              },
-            ),
+    return BackgroundPattern(
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Let the pattern show through
+        appBar: AppBar(title: const Text("SAVED TERMS")),
+        body: savedTerms.isEmpty
+            ? const Center(child: Text("No favorites saved yet!"))
+            : ListView.builder(
+                itemCount: savedTerms.length,
+                itemBuilder: (context, index) {
+                  final term = savedTerms[index];
+                  return ListTile(
+                    title: Text(term, style: const TextStyle(color: Colors.amber)),
+                    leading: const Icon(Icons.star, color: Colors.amber),
+                  );
+                },
+              ),
+      ),
     );
   }
 }

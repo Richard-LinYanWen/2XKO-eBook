@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'champion_roster.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart' hide YoutubePlayerController;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart' as yt_mobile;
+import 'background_pattern.dart';
 
 // --- REQUIREMENT MET: Convert JSON payload to a strict Custom Type Class Model ---
 class FuseTelemetry {
@@ -260,155 +259,157 @@ class _FuseDetailPageState extends State<FuseDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F),
-      appBar: AppBar(
-        title: Text('${widget.fuse.name.toUpperCase()} FUSE'),
-        backgroundColor: const Color(0xFF1A1A1A),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  widget.fuse.icon, 
-                  height: 160, 
-                  width: double.infinity, 
-                  fit: BoxFit.contain, 
-                  errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 100, color: Colors.cyanAccent),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            
-            Center(
-              child: Text(
-                widget.fuse.name.toUpperCase(), 
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)
-              ),
-            ),
-            const SizedBox(height: 15),
-            
-            // --- CHANGED: Stylized "SYSTEM MECHANIC" Badge ---
-            Center(
-              child: ClipPath(
-                clipper: PlaystyleClipper(),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(45, 8, 35, 8), 
-                  decoration: const BoxDecoration(color: Colors.cyanAccent), 
-                  child: const Text(
-                    "SYSTEM MECHANIC", 
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1)
+    return BackgroundPattern(
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Let the pattern show through
+        appBar: AppBar(
+          title: Text('${widget.fuse.name.toUpperCase()} FUSE'),
+          backgroundColor: const Color(0xFF1A1A1A),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    widget.fuse.icon, 
+                    height: 160, 
+                    width: double.infinity, 
+                    fit: BoxFit.contain, 
+                    errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 100, color: Colors.cyanAccent),
                   ),
                 ),
               ),
-            ),
-            
-            const Divider(height: 40, color: Colors.white24),
-            
-            const Text("SHOWCASE FEED", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent, letterSpacing: 1)),
-            const SizedBox(height: 12),
-            
-            FutureBuilder<FuseTelemetry>(
-              future: _apiFeedFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    padding: const EdgeInsets.all(24),
-                    width: double.infinity,
-                    decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(12)),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        LinearProgressIndicator(color: Colors.cyanAccent, backgroundColor: Colors.white12),
-                        SizedBox(height: 16),
-                        Text(
-                          "DATA DOWNLOAD IN PROGRESS...", 
-                          style: TextStyle(color: Colors.cyanAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)
-                        ),
-                      ],
+              const SizedBox(height: 20),
+              
+              Center(
+                child: Text(
+                  widget.fuse.name.toUpperCase(), 
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)
+                ),
+              ),
+              const SizedBox(height: 15),
+              
+              // --- CHANGED: Stylized "SYSTEM MECHANIC" Badge ---
+              Center(
+                child: ClipPath(
+                  clipper: PlaystyleClipper(),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(45, 8, 35, 8), 
+                    decoration: const BoxDecoration(color: Colors.cyanAccent), 
+                    child: const Text(
+                      "SYSTEM MECHANIC", 
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1)
                     ),
-                  );
-                }
-                
-                if (snapshot.hasError) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0x1FFF0055),
-                      border: Border.all(color: Colors.redAccent, width: 1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.wifi_off_rounded, color: Colors.redAccent, size: 32),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("TELEMETRY SYNC ERROR", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-                              const SizedBox(height: 4),
-                              Text(snapshot.error.toString(), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                }
-                
-                final telemetryData = snapshot.data!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
+                  ),
+                ),
+              ),
+              
+              const Divider(height: 40, color: Colors.white24),
+              
+              const Text("SHOWCASE FEED", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyanAccent, letterSpacing: 1)),
+              const SizedBox(height: 12),
+              
+              FutureBuilder<FuseTelemetry>(
+                future: _apiFeedFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      padding: const EdgeInsets.all(24),
                       width: double.infinity,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+                      decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(12)),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LinearProgressIndicator(color: Colors.cyanAccent, backgroundColor: Colors.white12),
+                          SizedBox(height: 16),
+                          Text(
+                            "DATA DOWNLOAD IN PROGRESS...", 
+                            style: TextStyle(color: Colors.cyanAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)
+                          ),
+                        ],
                       ),
-                      child: _isVideoInitialized && _youtubeController != null
-                          ? AspectRatio(
-                              aspectRatio: _isShort(telemetryData.youtubeId) ? 9 / 16 : 16 / 9,
-                              child: yt_mobile.YoutubePlayer(
-                                controller: _youtubeController!,
-                              ),
-                            )
-                          : const SizedBox(
-                              height: 220,
-                              child: Center(
-                                child: CircularProgressIndicator(color: Colors.cyanAccent),
-                              ),
+                    );
+                  }
+                  
+                  if (snapshot.hasError) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0x1FFF0055),
+                        border: Border.all(color: Colors.redAccent, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.wifi_off_rounded, color: Colors.redAccent, size: 32),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("TELEMETRY SYNC ERROR", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                                const SizedBox(height: 4),
+                                Text(snapshot.error.toString(), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
                             ),
-                    ),
-                    const SizedBox(height: 30),
-                    
-                    const Text("SYSTEM METRICS", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-                    const Divider(color: Colors.white12),
-                    
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.info_outline, color: Colors.blueAccent),
-                      title: const Text("Usage Rule", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      subtitle: Text(widget.fuse.description, style: const TextStyle(color: Colors.white70, height: 1.4)),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Handshake Node: ${telemetryData.status} (${telemetryData.apiVersion})", 
-                      style: const TextStyle(color: Colors.white30, fontSize: 11)
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  final telemetryData = snapshot.data!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+                        ),
+                        child: _isVideoInitialized && _youtubeController != null
+                            ? AspectRatio(
+                                aspectRatio: _isShort(telemetryData.youtubeId) ? 9 / 16 : 16 / 9,
+                                child: yt_mobile.YoutubePlayer(
+                                  controller: _youtubeController!,
+                                ),
+                              )
+                            : const SizedBox(
+                                height: 220,
+                                child: Center(
+                                  child: CircularProgressIndicator(color: Colors.cyanAccent),
+                                ),
+                              ),
+                      ),
+                      const SizedBox(height: 30),
+                      
+                      const Text("SYSTEM METRICS", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+                      const Divider(color: Colors.white12),
+                      
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.info_outline, color: Colors.blueAccent),
+                        title: const Text("Usage Rule", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                        subtitle: Text(widget.fuse.description, style: const TextStyle(color: Colors.white70, height: 1.4)),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Handshake Node: ${telemetryData.status} (${telemetryData.apiVersion})", 
+                        style: const TextStyle(color: Colors.white30, fontSize: 11)
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

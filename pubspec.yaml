@@ -1,4 +1,4 @@
-name: e_book_2xko
+name: twoxko_wiki_glossary
 description: "A Flutter eBook app showcasing the champion roster and fuse mechanics of the 2XKO game."
 publish_to: 'none'
 version: 0.1.0+1
@@ -20,6 +20,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -28,3 +29,9 @@ flutter:
     - assets/champs/
     - assets/fuses/
     - assets/icons/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/2XKO_Logo.png"
+  min_sdk_android: 21
