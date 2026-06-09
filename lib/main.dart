@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'champion_roster.dart';
 import 'fuse_mechanic.dart';
+import 'mechanics_glossary.dart';
 
 void main() => runApp(const ProjectLWikiApp());
 
@@ -28,7 +29,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('2XKO HANDBOOK', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w900)),
@@ -37,6 +38,7 @@ class HomePage extends StatelessWidget {
             tabs: [
               Tab(text: "CHAMPIONS"),
               Tab(text: "FUSES"),
+              Tab(text: "MECHANICS"),
             ],
           ),
         ),
@@ -44,6 +46,7 @@ class HomePage extends StatelessWidget {
           children: [
             RosterListView(), // Routed from champion_list_view.dart
             MechanicsGridView(), // Routed from mechanics_grid_view.dart
+            MechanicsGlossary(), // Routed from mechanics_glossary.dart
           ],
         ),
       ),
