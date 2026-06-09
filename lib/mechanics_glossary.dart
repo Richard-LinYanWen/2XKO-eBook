@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'favorites_page.dart';
 
 class GlossaryTerm {
   final String term;
@@ -107,10 +109,33 @@ class _MechanicsGlossaryState extends State<MechanicsGlossary> {
                   final item = filteredTerms[index];
                   return Card(
                     child: ListTile(
-                      // FIX: Ensure you are using dot notation here too
-                      title: Text(item.term, style: const TextStyle(color: Colors.cyanAccent)),
+                      // We use a Row to put the text and the icon side-by-side inside the title area
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.term, 
+                              style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              FavoritesManager.isFavorite(item.term) ? Icons.star : Icons.star_border,
+                              color: Colors.amber, // Yellow color for the star
+                            ),
+                            // This keeps the icon close to the text
+                            padding: EdgeInsets.zero, 
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              setState(() {
+                                FavoritesManager.toggle(item.term);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                       subtitle: Text(item.definition),
-                    ),
+                    )
                   );
                 },
               ),

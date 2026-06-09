@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-import 'champion_roster.dart';
-import 'fuse_mechanic.dart';
-import 'mechanics_glossary.dart';
+import 'login_page.dart';
+import 'favorites_page.dart';
 
-void main() => runApp(const ProjectLWikiApp());
+Set<String> globalFavorites = {};
 
-class ProjectLWikiApp extends StatelessWidget {
-  const ProjectLWikiApp({super.key});
+void main() async {
+  // Ensure Flutter is ready
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize your manager here so it loads data from disk
+  await FavoritesManager.init();
+  
+  runApp(const TwoXKOWikiApp());
+}
+
+class TwoXKOWikiApp extends StatelessWidget {
+  const TwoXKOWikiApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,38 +27,8 @@ class ProjectLWikiApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF1A1A1A)),
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('2XKO HANDBOOK', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.w900)),
-          bottom: const TabBar(
-            indicatorColor: Colors.cyanAccent,
-            tabs: [
-              Tab(text: "CHAMPIONS"),
-              Tab(text: "FUSES"),
-              Tab(text: "MECHANICS"),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            RosterListView(), // Routed from champion_list_view.dart
-            MechanicsGridView(), // Routed from mechanics_grid_view.dart
-            MechanicsGlossary(), // Routed from mechanics_glossary.dart
-          ],
-        ),
-      ),
+      // The Entry Point is now the Login Page
+      home: LoginPage(), 
     );
   }
 }
