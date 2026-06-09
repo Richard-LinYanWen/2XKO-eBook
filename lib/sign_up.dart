@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; 
-import 'sign_up.dart'; 
-import 'auth_manager.dart'; 
-import 'favorites_page.dart';
+import 'auth_manager.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final _userController = TextEditingController();
   final _passController = TextEditingController();
 
@@ -22,10 +19,22 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _handleSignUp() async {
+    final error = await AuthManager.register(_userController.text, _passController.text);
+    
+    if (!mounted) return;
+
+    if (error == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Account created!")));
+      Navigator.pop(context); // Return to login
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove the AppBar for a cleaner, modern "Welcome" screen look
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -54,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.person),
+                  prefixIcon: const Icon(Icons.person_add),
                 ),
               ),
               const SizedBox(height: 16),
@@ -71,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               
-              // Login Button
+              // Sign Up Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -79,32 +88,15 @@ class _LoginPageState extends State<LoginPage> {
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () async {
-                    bool success = await AuthManager.login(_userController.text, _passController.text);
-                    if (success) {
-                      await FavoritesManager.loadFavoritesForUser(_userController.text); 
-                      if (!mounted) return;
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-                    } else {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Invalid Credentials')),
-                      );
-                    }
-                  },
-                  child: const Text("LOGIN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  onPressed: _handleSignUp,
+                  child: const Text("CREATE ACCOUNT", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               
-              // Navigation to Sign Up
+              // Back to Login
               TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => const SignUpPage())
-                  );
-                },
-                child: const Text("Don't have an account? Sign Up"),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Already have an account? Login"),
               ),
             ],
           ),

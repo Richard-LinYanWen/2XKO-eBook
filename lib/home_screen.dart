@@ -1,16 +1,31 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart'; // The Tabbed Wiki
-import 'favorites_page.dart'; // We'll create this next
+import 'favorites_page.dart';
+import 'login_page.dart'; // To navigate back to login
 
 class HomeScreen extends StatelessWidget {
-  final Set<String> favorites; // We pass this through so we can show it
 
-  const HomeScreen({super.key, required this.favorites});
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("2XKO PORTAL")),
+      appBar: AppBar(
+        title: const Text("2XKO PORTAL"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              FavoritesManager.clear(); 
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildMenuCard(

@@ -4,12 +4,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FavoritesManager {
   static Set<String> _favorites = {};
   static late SharedPreferences _prefs;
+  static String? _currentUserId;
 
-  // This loads the data from the phone's storage
+  // Initialize SharedPreferences only once at startup
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    final List<String>? saved = _prefs.getStringList('favorites');
+  }
+
+  // CALL THIS after a successful login to load that specific user's data
+  static Future<void> loadFavoritesForUser(String userId) async {
+    _currentUserId = userId;
+    final List<String>? saved = _prefs.getStringList(_getPrefKey());
     _favorites = saved?.toSet() ?? {};
+  }
+
+  // Helper to generate the unique key (e.g., "favorites_user123")
+  static String _getPrefKey() {
+    return 'favorites_${_currentUserId ?? 'guest'}';
   }
 
   static bool isFavorite(String term) => _favorites.contains(term);
@@ -22,8 +33,14 @@ class FavoritesManager {
     } else {
       _favorites.add(term);
     }
-    // Save to disk immediately
-    _prefs.setStringList('favorites', _favorites.toList());
+    // Save to disk using the specific user's key
+    _prefs.setStringList(_getPrefKey(), _favorites.toList());
+  }
+
+  // CALL THIS on logout to prevent data leaking to the next user
+  static void clear() {
+    _currentUserId = null;
+    _favorites = {};
   }
 }
 
