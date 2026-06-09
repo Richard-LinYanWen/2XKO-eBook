@@ -1,44 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; // Required for JSON
 import 'background_pattern.dart';
+import 'terminology_detail.dart';
 
 class FavoritesManager {
-  static Set<String> _favorites = {};
+  // FIXED: Changed Set to Map
+  static Map<String, String> _favorites = {};
   static late SharedPreferences _prefs;
   static String? _currentUserId;
 
-  // Initialize SharedPreferences only once at startup
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  // CALL THIS after a successful login to load that specific user's data
   static Future<void> loadFavoritesForUser(String userId) async {
     _currentUserId = userId;
-    final List<String>? saved = _prefs.getStringList(_getPrefKey());
-    _favorites = saved?.toSet() ?? {};
+    final key = _getPrefKey();
+
+    // 1. Get the raw object (returns Object? instead of specifically String)
+    final Object? rawData = _prefs.get(key);
+
+    if (rawData is String) {
+      // 2. If it's a String, it's our new JSON format
+      try {
+        _favorites = Map<String, String>.from(jsonDecode(rawData));
+      } catch (e) {
+        debugPrint("Error decoding favorites JSON: $e");
+        _favorites = {};
+      }
+    } else {
+      // 3. If it's null, or a List<String> (old format), treat it as empty
+      // and remove the corrupted/old data entry.
+      _favorites = {};
+      await _prefs.remove(key); 
+    }
   }
 
-  // Helper to generate the unique key (e.g., "favorites_user123")
   static String _getPrefKey() {
     return 'favorites_${_currentUserId ?? 'guest'}';
   }
 
-  static bool isFavorite(String term) => _favorites.contains(term);
+  // FIXED: Changed contains to containsKey
+  static bool isFavorite(String term) => _favorites.containsKey(term);
 
-  static List<String> get allFavorites => _favorites.toList();
+  static String getDefinition(String term) => _favorites[term] ?? "";
 
-  static void toggle(String term) {
-    if (_favorites.contains(term)) {
+  static Map<String, String> get allFavorites => _favorites;
+
+  static void toggle(String term, String definition) {
+    if (_favorites.containsKey(term)) {
       _favorites.remove(term);
     } else {
-      _favorites.add(term);
+      _favorites[term] = definition;
     }
-    // Save to disk using the specific user's key
-    _prefs.setStringList(_getPrefKey(), _favorites.toList());
+    // Save as JSON string
+    _prefs.setString(_getPrefKey(), jsonEncode(_favorites));
   }
 
-  // CALL THIS on logout to prevent data leaking to the next user
   static void clear() {
     _currentUserId = null;
     _favorites = {};
@@ -50,22 +69,47 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the latest list every time the page builds
     final savedTerms = FavoritesManager.allFavorites;
 
     return BackgroundPattern(
       child: Scaffold(
-        backgroundColor: Colors.transparent, // Let the pattern show through
-        appBar: AppBar(title: const Text("SAVED TERMS")),
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("SAVED TERMS"),
+          backgroundColor: Colors.transparent,
+        ),
         body: savedTerms.isEmpty
-            ? const Center(child: Text("No favorites saved yet!"))
+            ? const Center(
+                child: Text("No favorites saved yet!", style: TextStyle(color: Colors.white70)),
+              )
             : ListView.builder(
+                padding: const EdgeInsets.all(8.0),
                 itemCount: savedTerms.length,
                 itemBuilder: (context, index) {
-                  final term = savedTerms[index];
-                  return ListTile(
-                    title: Text(term, style: const TextStyle(color: Colors.amber)),
-                    leading: const Icon(Icons.star, color: Colors.amber),
+                  final term = savedTerms.keys.elementAt(index);
+                  final definition = savedTerms.values.elementAt(index);
+                  
+                  return Card(
+                    // Matching your other pages' card style
+                    color: Colors.white.withValues(alpha: 0.05),
+                    child: ListTile(
+                      title: Text(
+                        term, 
+                        style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold),
+                      ),
+                      leading: const Icon(Icons.star, color: Colors.amber),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TerminologyDetail(
+                              term: term, 
+                              definition: definition,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'favorites_page.dart';
 import 'background_pattern.dart';
+import 'terminology_detail.dart';
 
 class GlossaryTerm {
   final String term;
@@ -129,13 +130,24 @@ class _MechanicsGlossaryState extends State<MechanicsGlossary> {
                               constraints: const BoxConstraints(),
                               onPressed: () {
                                 setState(() {
-                                  FavoritesManager.toggle(item.term);
+                                  FavoritesManager.toggle(item.term, item.definition);
                                 });
                               },
                             ),
                           ],
                         ),
-                        subtitle: Text(item.definition),
+                        //subtitle: Text(item.definition),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TerminologyDetail(
+                                term: item.term, 
+                                definition: item.definition, // Pass the definition here
+                              ),
+                            ),
+                          );
+                        },
                       )
                     );
                   },
